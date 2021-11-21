@@ -9,7 +9,7 @@ winsize get_resolution()
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     return w;
 }
-void printToCoordinates(int x, int y, char c)
+void print_to_coordinates(int x, int y, char c)
 {
     printf("\033[%d;%dH%c", x, y, c);
 }
@@ -38,7 +38,7 @@ int main()
                 {
                     pixel = '@';
                 }
-                printToCoordinates(j, i, pixel);
+                print_to_coordinates(j, i, pixel);
             }
         }
         if (t <= 2 * M_PI)
