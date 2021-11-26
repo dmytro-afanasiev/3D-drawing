@@ -2,6 +2,9 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <math.h>
+#include <chrono>
+#include <thread>
+
 
 winsize get_resolution()
 {
@@ -17,34 +20,27 @@ void print_to_coordinates(int x, int y, char c)
 int main()
 {
     winsize w = get_resolution();
-    int width = w.ws_col;
     int height = w.ws_row;
+    int width = w.ws_col;
     float relation = (float)width / height;
     float pixel_relation = 11.0f / 23.0f;
 
-
     float t = 0;
-    while (true)
+    for (int i = 0; i < height; i++)
     {
-        for (int i = 0; i < width; i++)
+        for (int j = 0; j < width; j++)
         {
-            for (int j = 0; j < height; j++)
+            float y = (float)i / height * 2.0f - 1.0f;
+            float x = (float)j / width * 2.0f - 1.0f;
+
+            x *= relation * pixel_relation;
+            char pixel = ' ';
+            if (x*x + y*y < 0.5)
             {
-                float x = (float)i / width * 2.0f - 1.0f;
-                float y = (float)j / height * 2.0f - 1.0f;
-                x *= relation * pixel_relation;
-                char pixel = ' ';
-                if (0.7f * cos(x + t * M_PI) < y)
-                {
-                    pixel = '@';
-                }
-                print_to_coordinates(j, i, pixel);
+                pixel = '@';
             }
+            print_to_coordinates(i, j, pixel);
         }
-        if (t <= 2 * M_PI)
-            t += 0.01;
-        else
-            t = t- 2*M_PI;
     }
 
     return 0;
