@@ -3,8 +3,8 @@
 #include <unistd.h>
 #include <math.h>
 #include <chrono>
-#include <thread>
-
+#include "helpers.cpp"
+#include "vectors.cpp"
 
 winsize get_resolution()
 {
@@ -17,49 +17,61 @@ void print_to_coordinates(int x, int y, char c)
     printf("\033[%d;%dH%c", x, y, c);
 }
 
-float cut(float value, float min, float max){
-    if (value < min)
-        return min;
-    else if (value > max)
-        return max;
-    else return value;
-}
-
-float distance_from_centre(float x, float y){
-    return sqrt(x*x + y*y);
+void print_field(char *field, int width, int heigth)
+{
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < heigth; j++)
+        {
+            print_to_coordinates(j, i, field[i + j * width]);
+        }
+    }
 }
 
 int main()
 {
     winsize w = get_resolution();
-    int height = w.ws_row;
     int width = w.ws_col;
+    int height = w.ws_row;;
+    char *field = new char[width * height];
     float relation = (float)width / height;
     float pixel_relation = 11.0f / 23.0f;
-    char gradient[] = " .:!/r(l1Z4H9W8$@";
+    char gradient[] = " .'`^\",:;Il!i><~+_-?][}{1)(|\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+    //char gradient[] = " .:-=+*#%@";
     int gradient_size = std::size(gradient) - 2;
 
-    float t = 0;
-    //while (true){
-    for (int i = 0; i < height; i++)
+
+    for (int t = 0; t < 10000; t++)
     {
-        for (int j = 0; j < width; j++)
+        vec3 light = vec3(sin(t*0.1), cos(t*0.1), sin(t*0.1)).norm();
+        for (int i = 0; i < width; i++)
         {
-            float y = (float)i / height * 2.0f - 1.0f;
-            float x = (float)j / width * 2.0f - 1.0f;
-            x *= relation * pixel_relation;
-            //x += sin(t*0.005);
-            char pixel = ' ';
-            float distance_to_point = distance_from_centre(x, y);
-        
-            int color = (int)(0.5f/ distance_to_point);
-            color = cut(color, 0, gradient_size);
-            pixel = gradient[color];
-            print_to_coordinates(i, j, pixel);
+            for (int j = 0; j < height; j++)
+            {
+                vec2 point = vec2(i, j) / vec2(width, height) * 2.0f - 1.0f;
+                point.x *= relation * pixel_relation;
+                vec3 ro = vec3(sin(t*0.01)-2.3, 0, 0);
+                vec3 rd = vec3(1, point).norm();
+                char pixel = ' ';
+                int color = 0;
+                vec3 ce(0, 0, 0);
+                vec2 intersection = sphIntersect(ro, rd, ce, 1.0f);
+                if (intersection.x > 0)
+                {
+                    vec3 itPoint = ro + rd * intersection.x;
+                    vec3 n = itPoint.norm();
+                    float diff = n.dot(light);
+                    color = (int)(diff *100);
+                }
+
+                color = clamp(color, 0, gradient_size);
+                pixel = gradient[color];
+                field[i + j * width] = pixel;
+            }
         }
-    //}
-    t++;
+        print_field(field, width, height);
     }
 
+    delete[] field;
     return 0;
 }
