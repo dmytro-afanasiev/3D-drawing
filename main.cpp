@@ -36,21 +36,21 @@ int main()
     char *field = new char[width * height];
     float relation = (float)width / height;
     float pixel_relation = 11.0f / 23.0f;
-    char gradient[] = " .'`^\",:;Il!i><~+_-?][}{1)(|\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
-    //char gradient[] = " .:-=+*#%@";
+    //char gradient[] = " .'`^\",:;Il!i><~+_-?][}{1)(|\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+    char gradient[] = " .:-=+*#%@";
     int gradient_size = std::size(gradient) - 2;
 
 
     for (int t = 0; t < 10000; t++)
     {
-        vec3 light = vec3(sin(t*0.1), cos(t*0.1), sin(t*0.1)).norm();
+        vec3 light = vec3(sin(t*0.01), cos(t*0.01), sin(t*0.01)).norm();
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
             {
                 vec2 point = vec2(i, j) / vec2(width, height) * 2.0f - 1.0f;
                 point.x *= relation * pixel_relation;
-                vec3 ro = vec3(sin(t*0.01)-2.3, 0, 0);
+                vec3 ro = vec3(sin(t*0.001)-2.3, 0, 0);
                 vec3 rd = vec3(1, point).norm();
                 char pixel = ' ';
                 int color = 0;
@@ -61,7 +61,7 @@ int main()
                     vec3 itPoint = ro + rd * intersection.x;
                     vec3 n = itPoint.norm();
                     float diff = n.dot(light);
-                    color = (int)(diff *100);
+                    color = (int)(diff *20);
                 }
 
                 color = clamp(color, 0, gradient_size);
